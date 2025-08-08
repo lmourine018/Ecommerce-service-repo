@@ -73,7 +73,6 @@ class Category(models.Model):
 class Product(models.Model):
     """Product that can belong to multiple categories (including deep categories)."""
     name = models.CharField(max_length=255)
-    sku = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     categories = models.ManyToManyField(Category, related_name='products', blank=True)
@@ -89,12 +88,10 @@ class Product(models.Model):
 
 
 class Customer(models.Model):
-    """Simple customer details."""
     first_name = models.CharField(max_length=120)
     last_name = models.CharField(max_length=120)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=30, blank=True)
-    address = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -105,7 +102,6 @@ class Customer(models.Model):
 
 
 class Order(models.Model):
-    """Order with simple details and related order items."""
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('processing', 'Processing'),
@@ -130,7 +126,6 @@ class Order(models.Model):
         items = self.items.all()
         total = sum((item.unit_price * item.quantity) for item in items)
         return total
-
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)

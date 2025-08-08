@@ -17,16 +17,19 @@ class ProductSerializer(serializers.ModelSerializer):
     categories = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Category.objects.all()
     )
+    categories_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'sku', 'description', 'price', 'stock', 'categories']
+        fields = ['id', 'name', 'description', 'price', 'stock', 'categories', 'categories_name']
 
+    def get_categories_name(self, obj):
+        return [category.name for category in obj.categories.all()]
 
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ['id', 'first_name', 'last_name', 'email', 'phone', 'address']
+        fields = ['id', 'first_name', 'last_name', 'email', 'phone']
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -47,8 +50,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'customer', 'customer_detail', 'placed_at', 'status',
-                  'shipping_address', 'items', 'total']
+        fields = ['id', 'customer', 'customer_detail',
+                  'shipping_address','items']
         read_only_fields = ['total', 'placed_at']
 
     def create(self, validated_data):
