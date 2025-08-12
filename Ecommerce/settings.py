@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import os
 from pathlib import Path
 from decouple import config
 
@@ -25,8 +26,29 @@ SECRET_KEY = 'django-insecure-x^zj)m*$j%8)x4cooqi1+-##e&ts@kv=l2yhd@q&(p6s9%83zu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
+# Session storage in DB (works reliably for OIDC)
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
+# Local development: don’t require HTTPS for cookies
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+
+# Allow cookies across the Google redirect
+SESSION_COOKIE_SAMESITE = None  # Important! None allows cross-site POST/redirect
+CSRF_COOKIE_SAMESITE = None
+
+# Use default domain for cookies
+SESSION_COOKIE_DOMAIN = None
+
+# Optional: make session last long enough for Google redirects
+SESSION_COOKIE_AGE = 300  # 5 minutes
+
+# Debug: Print session keys during OIDC flow
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 # Application definition
 
@@ -37,17 +59,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'ecommerce_app'
+    'ecommerce_app',
+    'mozilla_django_oidc',
+    'rest_framework',
+    # 'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',      # REQUIRED
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',   # REQUIRED
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'mozilla_django_oidc.middleware.SessionRefresh',            # OIDC - Must be LAST
 ]
 
 ROOT_URLCONF = 'Ecommerce.urls'
@@ -76,7 +102,7 @@ WSGI_APPLICATION = 'Ecommerce.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='ecommerce_db'),
+        'NAME': config('DB_NAME', default='ecomerce-db'),
         'USER': config('DB_USER', default='postgres'),
         'PASSWORD': config('DB_PASSWORD', default='password'),
         'HOST': config('DB_HOST', default='localhost'),
@@ -121,8 +147,43 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+LOGIN_REDIRECT_URL = '/'   # Redirect to home page
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTHENTICATION_BACKENDS = [
+    'ecommerce_app.auth_backends.CustomOIDCAuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+OIDC_RP_CLIENT_ID = os.environ.get('OIDC_CLIENT_ID', '1079797663997-e5jkq8p5g745c28acp6n1dljtb6vu7ee.apps.googleusercontent.com')
+OIDC_RP_CLIENT_SECRET = os.environ.get('OIDC_CLIENT_SECRET', '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')
+OIDC_OP_AUTHORIZATION_ENDPOINT = os.environ.get('OIDC_AUTH_ENDPOINT', 'https://accounts.google.com/o/oauth2/v2/auth')
+OIDC_OP_TOKEN_ENDPOINT = os.environ.get('OIDC_TOKEN_ENDPOINT', 'https://oauth2.googleapis.com/token')
+OIDC_OP_USER_ENDPOINT = os.environ.get('OIDC_USER_ENDPOINT', 'https://openidconnect.googleapis.com/v1/userinfo')
+OIDC_OP_JWKS_ENDPOINT = os.environ.get('OIDC_JWKS_ENDPOINT', 'https://www.googleapis.com/oauth2/v3/certs')
+OIDC_RP_SIGN_ALGO = 'RS256'
+OIDC_RP_SCOPES = 'openid email profile'
+OIDC_STORE_ACCESS_TOKEN = True
+OIDC_STORE_ID_TOKEN = True
+print("OIDC_RP_CLIENT_ID:", OIDC_RP_CLIENT_ID)
+print("OIDC_RP_CLIENT_SECRET:", OIDC_RP_CLIENT_SECRET)
+
+AFRICASTALKING_USERNAME = os.environ.get('AFRICASTALKING_USERNAME', default = 'sandbox')
+AFRICASTALKING_API_KEY = os.environ.get('Africas_Talking_Api_Key', default= 'atsk_e708642d67fadf5406168146d4cfb4d75f13be5253213b979ef497f1f5270fd825b7815e')
+AFRICASTALKING_SENDER_ID = os.environ.get('AFRICASTALKING_SENDER_ID', default = 'Sandbox')
+print("AFRICASTALKING_API_KEY", AFRICASTALKING_API_KEY)
+print("AFRICASTALKING_USERNAME:", AFRICASTALKING_USERNAME)
+
+# After login, redirect here
+LOGOUT_REDIRECT_URL = "/"
+
+EMAIL_BACKEND = config("EMAIL_BACKEND")
+EMAIL_HOST = config("EMAIL_HOST")
+EMAIL_PORT = config("EMAIL_PORT")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS")  # Whether to use TLS
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")  # SMTP server username
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")  # SMTP server password
+DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER")  # Default sender address
+ADMIN_EMAIL = config("ADMIN_EMAIL")

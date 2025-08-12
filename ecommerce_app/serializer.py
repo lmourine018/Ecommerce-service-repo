@@ -1,4 +1,11 @@
-from rest_framework import serializers
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from rest_framework import serializers, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from .models import Category, Product, Customer, Order, OrderItem
 
 
@@ -15,10 +22,8 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     categories = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Category.objects.all()
-    )
+        many=True, queryset=Category.objects.all())
     categories_name = serializers.SerializerMethodField()
-
     class Meta:
         model = Product
         fields = ['id', 'name', 'description', 'price', 'stock', 'categories', 'categories_name']
@@ -26,10 +31,20 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_categories_name(self, obj):
         return [category.name for category in obj.categories.all()]
 
+
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ['id', 'first_name', 'last_name', 'email', 'phone']
+        fields = ['id','first_name', 'last_name', 'email', 'phone', 'created_at', 'last_login']
+        read_only_fields = ['created_at', 'last_login']
+
+    def validate_email(self, value):
+        """Ensure email uniqueness"""
+        customer = self.instance
+        if Customer.objects.filter(email=value).exclude(pk=customer.pk if customer else None).exists():
+            raise serializers.ValidationError("A customer with this email already exists.")
+        return value
+
 
 
 class OrderItemSerializer(serializers.ModelSerializer):

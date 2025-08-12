@@ -1,22 +1,10 @@
 from django.db import models
 from django.utils.text import slugify
 from decimal import Decimal
+from django.contrib.auth.models import User
 
 
 class Category(models.Model):
-    """
-    Self-referential category model that supports an arbitrary-depth hierarchy
-    via a `parent` ForeignKey. You can build trees like:
-
-    All Products
-      ├─ Bakery
-      │   ├─ Bread
-      │   └─ Cookies
-      └─ Produce
-          ├─ Fruits
-          └─ Vegetables
-    """
-
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, blank=True)
     parent = models.ForeignKey(
@@ -88,12 +76,14 @@ class Product(models.Model):
 
 
 class Customer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='customer_profile')
     first_name = models.CharField(max_length=120)
     last_name = models.CharField(max_length=120)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=30, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    oidc_sub = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    last_login = models.DateTimeField(null=True, blank=True)
     class Meta:
         ordering = ('last_name', 'first_name')
 
