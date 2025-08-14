@@ -72,7 +72,7 @@ class Product(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return f"{self.name} ({self.sku})"
+        return f"{self.name} ({self.description})"
 
 
 class Customer(models.Model):

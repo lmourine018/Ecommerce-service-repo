@@ -8,7 +8,7 @@ import jwt
 import requests
 from django.conf import settings
 
-from Ecommerce.ecommerce_app.models import Customer
+from Ecommerce_project.ecommerce_app.models import Customer
 
 User = get_user_model()
 
