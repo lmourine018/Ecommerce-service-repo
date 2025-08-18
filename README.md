@@ -50,11 +50,10 @@ A production-ready ecommerce backend that supports hierarchical product categori
 * **Product**
 
   * `id`, `name`, `description`, `price`, `created_at`, `updated_at`
-  * M2M: `categories` → `Category`
 
 * **Order**
 
-  * `id`, `customer` (FK), `status` (e.g., `PENDING`, `PAID`, `CANCELLED`), `total_amount`, `placed_at`
+  * `id`, `customer` (FK), `status` ( `PENDING`, `PAID`, `CANCELLED`), `total_amount`, `placed_at`
 
 * **OrderItem**
 
@@ -146,7 +145,6 @@ Use OIDC for login (browser-based); for API, issue DRF token or JWT after OIDC c
       ]
     }
     ```
-  * Behavior: Ensures full category path exists (creates missing nodes) using MPTT; links product to leaf node(s).
   * Response: `201 Created` with created/updated product IDs.
 
 * **POST** `/categories/`
@@ -187,7 +185,7 @@ Use OIDC for login (browser-based); for API, issue DRF token or JWT after OIDC c
         { "product_id": 10, "quantity": 2 },
         { "product_id": 15, "quantity": 1 }
       ],
-      "currency": "USD"
+      "currency": "Ksh"
     }
     ```
   * Response `201 Created`:
@@ -197,7 +195,7 @@ Use OIDC for login (browser-based); for API, issue DRF token or JWT after OIDC c
       "id": 123,
       "status": "PENDING",
       "total_amount": "10.97",
-      "currency": "USD",
+      "currency": "Ksh",
       "placed_at": "2025-08-18T10:00:00Z",
       "items": [
         { "product": 10, "quantity": 2, "unit_price": "3.99" },
@@ -301,7 +299,7 @@ python manage.py runserver
 ```
 DEBUG=true
 SECRET_KEY=changeme
-DATABASE_URL=postgres://user:pass@localhost:5432/ecomms
+DATABASE_URL=postgres://user:pass@localhost:5432/ecomerce_db
 ALLOWED_HOSTS=*
 
 # OIDC
@@ -355,12 +353,7 @@ fail_under = 85
 show_missing = true
 ```
 
-### Integration/E2E (Optional, bonus)
 
-* Spin PostgreSQL with Testcontainers or Docker Compose.
-* Use `requests` against the running API, or `django.test.Client` for flows: OIDC login mock → product upload → order placement → notifications mocked.
-
----
 
 
 
@@ -369,49 +362,58 @@ show_missing = true
 
 ## Deployment (Kubernetes)
 
-### Manifests
+### Munikube
 
 `k8s/deployment.yaml`
 
-```yaml
-apiVersion: apps/v1
+```
+   apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ecomms-api
+  name: ecommerce
 spec:
-  replicas: 2
+  replicas: 1
   selector:
-    matchLabels: { app: ecomms-api }
+    matchLabels:
+      app: ecommerce
   template:
     metadata:
-      labels: { app: ecomms-api }
+      labels:
+        app: ecommerce
     spec:
       containers:
-        - name: api
-          image: ghcr.io/<owner>/ecomms:latest
-          ports: [{ containerPort: 8000 }]
-          env:
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: ecomms-secrets
-                  key: DATABASE_URL
-            - name: SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ecomms-secrets
-                  key: SECRET_KEY
+      - name: ecommerce
+        image: ecommerce:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DEBUG
+          value: "1"
+        - name: ALLOWED_HOSTS
+          value: "*"
+        volumeMounts:
+        - name: media-storage
+          mountPath: /app/media
+      volumes:
+      - name: media-storage
+        emptyDir: {}
+
+   
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: ecomms-service
+  name: ecommerce-service
 spec:
-  selector: { app: ecomms-api }
+  selector:
+    app: ecommerce
   ports:
-    - port: 80
-      targetPort: 8000
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
   type: NodePort
+
 ```
 
 `k8s/secrets.yaml` *(create with real values)*
@@ -436,9 +438,8 @@ stringData:
 * Get service URL (minikube):
 
   ```bash
-  minikube service ecomms-service --url
+  minikube service ecommerce-service --url
   ```
-* For **kind**, use an Ingress (e.g., NGINX Ingress Controller) and create `Ingress` manifest.
 
 ---
 
