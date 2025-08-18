@@ -1,1 +1,1 @@
-[Live API](https://ecommerce_app.com/api/)
+[Live API](https://ecommerce-service-repo.onrender.com/)
