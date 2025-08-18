@@ -31,7 +31,7 @@ A production-ready ecommerce backend that supports hierarchical product categori
 
 * **OIDC Provider**:  Google OIDC.
 * **Africa’s Talking (AT)**: SMS notifications.
-* **SMTP**: SendGrid, Mailgun, or any SMTP server for admin email.
+* **SMTP**: SMTP server for admin email.
 
 
 ## Data Model
