@@ -1,6 +1,6 @@
-# Ecommerce Platform – Full Project Documentation
+# Ecommerce Project 
 
-> **Stack**: Python 3.12, Django 5, Django REST Framework, PostgreSQL, Redis (optional), OpenID Connect (OIDC), Africa’s Talking (SMS), GitHub Actions (CI/CD), Docker, Kubernetes (minikube/kind)
+> **Stack**: Python 3.12, Django 5, Django REST Framework, PostgreSQL, OpenID Connect (OIDC), Africa’s Talking (SMS), GitHub Actions (CI/CD), Docker, Kubernetes (minikube)
 
 ---
 
