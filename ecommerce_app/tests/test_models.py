@@ -1,10 +1,8 @@
 import pytest
 from decimal import Decimal
 from django.contrib.auth.models import User
-# Use absolute import instead of relative import
 from ecommerce_app.models import Category, Product, Customer, Order, OrderItem
 
-print(">>> Starting test_models.py import")
 
 @pytest.mark.django_db
 class TestCategoryModel:

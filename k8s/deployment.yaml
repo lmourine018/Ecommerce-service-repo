@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce
+  template:
+    metadata:
+      labels:
+        app: ecommerce
+    spec:
+      containers:
+      - name: ecommerce
+        image: ecommerce:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DEBUG
+          value: "1"
+        - name: ALLOWED_HOSTS
+          value: "*"
+        volumeMounts:
+        - name: media-storage
+          mountPath: /app/media
+      volumes:
+      - name: media-storage
+        emptyDir: {}
