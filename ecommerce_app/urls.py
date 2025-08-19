@@ -17,30 +17,30 @@ def home(request):
         "email": request.user.email
     })
 urlpatterns = [
-    path('categories/', CategoryListCreateAPIView.as_view(), name='category-list'),
-    path('categories/<int:pk>/', CategoryDetailAPIView.as_view(), name='category-detail'),
+    path('api/v1/categories/', CategoryListCreateAPIView.as_view(), name='category-list'),
+    path('api/v1/categories/<int:pk>/', CategoryDetailAPIView.as_view(), name='category-detail'),
 
-    path('products/', ProductListCreateAPIView.as_view(), name='product-list'),
-    path('products/<int:pk>/', ProductDetailAPIView.as_view(), name='product-detail'),
+    path('api/v1/products/', ProductListCreateAPIView.as_view(), name='product-list'),
+    path('api/v1/products/<int:pk>/', ProductDetailAPIView.as_view(), name='product-detail'),
 
-    path('customers/', CustomerListCreateAPIView.as_view(), name='customer-list'),
-    path('customers/<int:pk>/', CustomerDetailAPIView.as_view(), name='customer-detail'),
+    path('api/v1/customers/', CustomerListCreateAPIView.as_view(), name='customer-list'),
+    path('api/v1/customers/<int:pk>/', CustomerDetailAPIView.as_view(), name='customer-detail'),
 
-    path('orders/', OrderListCreateAPIView.as_view(), name='order-list'),
-    path('orders/<int:pk>/', OrderDetailAPIView.as_view(), name='order-detail'),
+    path('api/v1/orders/', OrderListCreateAPIView.as_view(), name='order-list'),
+    path('api/v1/orders/<int:pk>/', OrderDetailAPIView.as_view(), name='order-detail'),
 
-    path('order-item/', OrderItemListCreateAPIView.as_view(), name='order-item-list'),
-    path('order-item/<int:pk>/', OrderItemDetailAPIView.as_view(), name='order-item-detail'),
+    path('api/v1/order-item/', OrderItemListCreateAPIView.as_view(), name='order-item-list'),
+    path('api/v1/order-item/<int:pk>/', OrderItemDetailAPIView.as_view(), name='order-item-detail'),
     # Custom auth views
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
-    path('profile/', views.profile_view, name='profile'),
+    path('api/v1/login/', views.login_view, name='login'),
+    path('api/v1/logout/', views.logout_view, name='logout'),
+    path('api/v1/profile/', views.profile_view, name='profile'),
     path("oidc/authenticate/", oidc_views.OIDCAuthenticationRequestView.as_view(), name="oidc_authentication_init"),
     path("oidc/callback/", oidc_views.OIDCAuthenticationCallbackView.as_view(), name="oidc_callback"),
     # API endpoints
     path('api/customer/profile/', views.CustomerProfileAPIView.as_view(), name='api-customer-profile'),
     path('api/customer/update/', views.CustomerUpdateAPIView.as_view(), name='api-customer-update'),
     path("", home),
-    path('categories/<int:category_id>/average-price/', AveragePriceView.as_view(), name='average-price'),
+    path('api/v1/categories/<int:category_id>/average-price/', AveragePriceView.as_view(), name='average-price'),
 
 ]

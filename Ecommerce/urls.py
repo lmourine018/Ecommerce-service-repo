@@ -19,7 +19,7 @@ from django.urls import path,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("api/v1",include('ecommerce_app.urls')),
+    path("",include('ecommerce_app.urls')),
     path('oidc/', include('mozilla_django_oidc.urls')),
 
 ]
