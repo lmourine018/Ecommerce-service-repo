@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from decouple import config
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -187,3 +188,25 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER")  # SMTP server username
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")  # SMTP server password
 DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER")  # Default sender address
 ADMIN_EMAIL = config("ADMIN_EMAIL")
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# Database configuration for Render
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default='postgresql://ecomerce_db_t2rb_user:GRMiHTQ5R4R9LFDIosTPRtUCyGgWJEZx@dpg-d2i2orndiees73cqi7f0-a/ecomerce_db_t2rb',
+            conn_max_age=600,
+            conn_health_checks=True
+        )
+    }
+# Static files configuration
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Add WhiteNoise to middleware (if not already present)
+if 'whitenoise.middleware.WhiteNoiseMiddleware' not in MIDDLEWARE:
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
